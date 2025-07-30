@@ -15,4 +15,9 @@ def load(data_frames: Dict[str, DataFrame], database: Engine):
     # use pandas.Dataframe.to_sql() to load the dataframe into the database as a
     # table.
     # For the table name use the `data_frames` dict keys.
-    raise NotImplementedError
+
+    keys = data_frames.keys()
+    for table in keys:
+        df = data_frames[table]
+        df.to_sql(name=table, con=database, if_exists='replace', index=False)
+        
