@@ -20,4 +20,5 @@ def load(data_frames: Dict[str, DataFrame], database: Engine):
     for table in keys:
         df = data_frames[table]
         df.to_sql(name=table, con=database, if_exists='replace', index=False)
+
         

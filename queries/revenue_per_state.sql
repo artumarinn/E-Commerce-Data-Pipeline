@@ -3,3 +3,12 @@
 -- with most revenue and the second one the total revenue of each.
 -- HINT: All orders should have a delivered status and the actual delivery date 
 -- should be not null. 
+
+SELECT oc.customer_state, SUM(ooi.price+ ooi.freight_value) AS Revenue
+FROM olist_customers oc
+JOIN olist_orders oo  ON oc.customer_id = oo.customer_id 
+JOIN olist_order_items ooi ON oo.order_id = ooi.order_id 
+WHERE oo.order_status = 'delivered' AND oo.order_delivered_customer_date IS NOT NULL
+GROUP BY customer_state
+ORDER BY Revenue DESC
+LIMIT 10;
