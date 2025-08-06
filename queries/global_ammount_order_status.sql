@@ -3,8 +3,8 @@
 -- second one the total ammount of each.
 
 SELECT 
-    order_status DESC,
-    COUNT(*) AS Amount
+    order_status,
+    COUNT(*) AS Ammount
 FROM olist_orders
 GROUP BY order_status
-ORDER BY Amount;
+ORDER BY Ammount;
