@@ -56,6 +56,7 @@ FROM (
     AND oo.order_delivered_customer_date IS NOT NULL
     AND oo.order_estimated_delivery_date IS NOT NULL
     AND oo.order_purchase_timestamp IS NOT NULL
+    AND STRFTIME('%m', oo.order_delivered_customer_date) IS NOT NULL
 ) oo
 GROUP BY STRFTIME('%m', oo.order_delivered_customer_date)
 ORDER BY month_no;

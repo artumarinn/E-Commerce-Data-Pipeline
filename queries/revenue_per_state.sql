@@ -13,6 +13,6 @@ JOIN olist_order_items ooi ON oo.order_id = ooi.order_id
 WHERE 
     oo.order_status = 'delivered' 
     AND oo.order_delivered_customer_date IS NOT NULL
-GROUP BY customer_state
+GROUP BY oc.customer_state
 ORDER BY Revenue DESC
 LIMIT 10;

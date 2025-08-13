@@ -7,4 +7,4 @@ SELECT
     COUNT(*) AS Ammount
 FROM olist_orders
 GROUP BY order_status
-ORDER BY Ammount;
+ORDER BY order_status;

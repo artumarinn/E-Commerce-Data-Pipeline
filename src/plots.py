@@ -5,6 +5,7 @@ import plotly.express as px
 import seaborn as sns
 
 from pandas import DataFrame
+import pandas as pd
 
 
 def plot_revenue_by_month_year(df: DataFrame, year: int):
@@ -181,7 +182,37 @@ def plot_freight_value_weight_relationship(df: DataFrame):
     """
     # TODO: plot freight value weight relationship using seaborn scatterplot.
     # Your x-axis should be weight and, y-axis freight value.
-    raise NotImplementedError
+    
+    matplotlib.rc_file_defaults()
+    sns.set_style(style=None, rc=None)
+    
+    plt.figure(figsize=(12, 8))
+    
+    # Create scatterplot with weight on x-axis and freight value on y-axis
+    sns.scatterplot(data=df, x='product_weight_g', y='freight_value', 
+                    alpha=0.6, s=30, color='steelblue')
+    
+    # Add trend line
+    sns.regplot(data=df, x='product_weight_g', y='freight_value', 
+                scatter=False, color='red', line_kws={'linewidth': 2})
+    
+    plt.title('Freight Value vs Product Weight Relationship', fontsize=16, fontweight='bold')
+    plt.xlabel('Product Weight (grams)', fontsize=12)
+    plt.ylabel('Freight Value (BRL)', fontsize=12)
+    plt.grid(True, alpha=0.3)
+    
+    # Add correlation coefficient
+    correlation = df['product_weight_g'].corr(df['freight_value'])
+    plt.text(0.05, 0.95, f'Correlation: {correlation:.3f}', 
+             transform=plt.gca().transAxes, fontsize=12, 
+             bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.8))
+    
+    # Set reasonable axis limits
+    plt.xlim(0, df['product_weight_g'].quantile(0.95))
+    plt.ylim(0, df['freight_value'].quantile(0.95))
+    
+    plt.tight_layout()
+    plt.show()
 
 
 def plot_delivery_date_difference(df: DataFrame):
@@ -190,9 +221,19 @@ def plot_delivery_date_difference(df: DataFrame):
     Args:
         df (DataFrame): Dataframe with delivery date difference query result
     """
-    sns.barplot(data=df, x="Delivery_Difference", y="State").set(
-        title="Difference Between Delivery Estimate Date and Delivery Date"
-    )
+    matplotlib.rc_file_defaults()
+    sns.set_style(style=None, rc=None)
+    
+    plt.figure(figsize=(12, 8))
+    
+    sns.barplot(data=df, x="Delivery_Difference", y="State")
+    plt.title("Difference Between Delivery Estimate Date and Delivery Date", fontsize=14, fontweight='bold')
+    plt.xlabel("Delivery Difference (days)", fontsize=12)
+    plt.ylabel("State", fontsize=12)
+    plt.grid(True, alpha=0.3)
+    
+    plt.tight_layout()
+    plt.show()
 
 
 def plot_order_amount_per_day_with_holidays(df: DataFrame):
@@ -204,4 +245,54 @@ def plot_order_amount_per_day_with_holidays(df: DataFrame):
     # TODO: plot order amount per day with holidays using matplotlib.
     # Mark holidays with vertical lines.
     # Hint: use plt.axvline.
-    raise NotImplementedError
+    
+    matplotlib.rc_file_defaults()
+    sns.set_style(style=None, rc=None)
+    
+    plt.figure(figsize=(15, 8))
+    
+    # Convert date column to datetime if it's not already
+    df_copy = df.copy()
+    df_copy['date'] = pd.to_datetime(df_copy['date'])
+    
+    # Sort by date
+    df_copy = df_copy.sort_values('date')
+    
+    # Create the main plot
+    plt.plot(df_copy['date'], df_copy['order_count'], 
+             marker='o', linewidth=1.5, markersize=4, 
+             color='steelblue', label='Orders per Day', alpha=0.8)
+    
+    # Mark holidays with vertical lines
+    holiday_dates = df_copy[df_copy['holiday'] == True]['date']
+    for holiday_date in holiday_dates:
+        plt.axvline(x=holiday_date, color='red', linestyle='--', 
+                   alpha=0.8, linewidth=1.5, label='Holiday' if holiday_date == holiday_dates.iloc[0] else "")
+    
+    # Customize the plot
+    plt.title('Orders per Day in 2017 with Holiday Markers', fontsize=16, fontweight='bold')
+    plt.xlabel('Date', fontsize=12)
+    plt.ylabel('Number of Orders', fontsize=12)
+    plt.grid(True, alpha=0.2)
+    
+    # Rotate x-axis labels for better readability
+    plt.xticks(rotation=45)
+    
+    # Add legend
+    plt.legend()
+    
+    # Add annotations for some holidays (limit to avoid clutter)
+    for holiday_date in holiday_dates[:3]:  # Annotate first 3 holidays
+        order_count = df_copy[df_copy['date'] == holiday_date]['order_count'].iloc[0]
+        plt.annotate('Holiday', 
+                     xy=(holiday_date, order_count),
+                     xytext=(10, 10), textcoords='offset points',
+                     bbox=dict(boxstyle="round,pad=0.3", facecolor="yellow", alpha=0.7),
+                     arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=0"),
+                     fontsize=10)
+    
+    # Set y-axis to start from 0
+    plt.ylim(bottom=0)
+    
+    plt.tight_layout()
+    plt.show()

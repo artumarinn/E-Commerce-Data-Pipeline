@@ -22,12 +22,13 @@ SELECT
     WHEN '12' THEN 'Dec'
   END AS month,
   SUM(CASE WHEN STRFTIME('%Y', oo.order_delivered_customer_date ) = '2016' 
-  THEN ooi.price+ ooi.freight_value ELSE 0 END) AS Year2016,
+  THEN (SELECT SUM(oi2.price + oi2.freight_value) FROM olist_order_items oi2 WHERE oi2.order_id = oo.order_id) ELSE 0 END) AS Year2016,
   SUM(CASE WHEN STRFTIME('%Y', oo.order_delivered_customer_date ) = '2017' 
-  THEN ooi.price+ ooi.freight_value ELSE 0 END) AS Year2017 ,
+  THEN (SELECT SUM(oi2.price + oi2.freight_value) FROM olist_order_items oi2 WHERE oi2.order_id = oo.order_id) ELSE 0 END) AS Year2017 ,
   SUM(CASE WHEN STRFTIME('%Y', oo.order_delivered_customer_date ) = '2018' 
-  THEN ooi.price+ ooi.freight_value ELSE 0 END) AS Year2018 
+  THEN (SELECT SUM(oi2.price + oi2.freight_value) FROM olist_order_items oi2 WHERE oi2.order_id = oo.order_id) ELSE 0 END) AS Year2018 
 FROM olist_orders oo
-JOIN olist_order_items ooi ON oo.order_id = ooi.order_id
+WHERE oo.order_delivered_customer_date IS NOT NULL
+  AND STRFTIME('%m', oo.order_delivered_customer_date) IS NOT NULL
 GROUP BY STRFTIME('%m', oo.order_delivered_customer_date)
 ORDER BY month_no;
