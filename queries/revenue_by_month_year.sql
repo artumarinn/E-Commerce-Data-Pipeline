@@ -4,31 +4,37 @@
 -- Year2016, with the revenue per month of 2016 (0.00 if it doesn't exist);
 -- Year2017, with the revenue per month of 2017 (0.00 if it doesn't exist) and
 -- Year2018, with the revenue per month of 2018 (0.00 if it doesn't exist).
+-- Query definitiva para revenue_by_month_year
 
-SELECT 
-  STRFTIME('%m', oo.order_delivered_customer_date) AS month_no,
-  CASE STRFTIME('%m', oo.order_delivered_customer_date )
-    WHEN '01' THEN 'Jan'
-    WHEN '02' THEN 'Feb'
-    WHEN '03' THEN 'Mar'
-    WHEN '04' THEN 'Apr'
-    WHEN '05' THEN 'May'
-    WHEN '06' THEN 'Jun'
-    WHEN '07' THEN 'Jul'
-    WHEN '08' THEN 'Aug'
-    WHEN '09' THEN 'Sep'
-    WHEN '10' THEN 'Oct'
-    WHEN '11' THEN 'Nov'
-    WHEN '12' THEN 'Dec'
-  END AS month,
-  SUM(CASE WHEN STRFTIME('%Y', oo.order_delivered_customer_date ) = '2016' 
-  THEN (SELECT SUM(oi2.price + oi2.freight_value) FROM olist_order_items oi2 WHERE oi2.order_id = oo.order_id) ELSE 0 END) AS Year2016,
-  SUM(CASE WHEN STRFTIME('%Y', oo.order_delivered_customer_date ) = '2017' 
-  THEN (SELECT SUM(oi2.price + oi2.freight_value) FROM olist_order_items oi2 WHERE oi2.order_id = oo.order_id) ELSE 0 END) AS Year2017 ,
-  SUM(CASE WHEN STRFTIME('%Y', oo.order_delivered_customer_date ) = '2018' 
-  THEN (SELECT SUM(oi2.price + oi2.freight_value) FROM olist_order_items oi2 WHERE oi2.order_id = oo.order_id) ELSE 0 END) AS Year2018 
-FROM olist_orders oo
-WHERE oo.order_delivered_customer_date IS NOT NULL
-  AND STRFTIME('%m', oo.order_delivered_customer_date) IS NOT NULL
-GROUP BY STRFTIME('%m', oo.order_delivered_customer_date)
-ORDER BY month_no;
+with revenue_time as (
+    select o.customer_id, o.order_id, o.order_delivered_customer_date,
+    strftime('%m', o.order_delivered_customer_date) as month_no,
+    strftime('%Y', o.order_delivered_customer_date) as year,
+    p.payment_value
+    from olist_orders o 
+    inner join olist_order_payments p on (o.order_id = p.order_id ) 
+    where o.order_status = 'delivered'
+    and o.order_delivered_customer_date is not null
+    group by o.customer_id, o.order_id, o.order_delivered_customer_date, month_no, "year" 
+)
+select month_no,
+case month_no
+    when '01' then 'Jan' 
+    when '02' then 'Feb' 
+    when '03' then 'Mar' 
+    when '04' then 'Apr' 
+    when '05' then 'May' 
+    when '06' then 'Jun' 
+    when '07' then 'Jul' 
+    when '08' then 'Aug' 
+    when '09' then 'Sep' 
+    when '10' then 'Oct' 
+    when '11' then 'Nov' 
+    when '12' then 'Dec' 
+end as month,
+coalesce(sum(case year when '2016' then payment_value end), 0.0) as Year2016,
+coalesce(sum(case year when '2017' then payment_value end), 0.0) as Year2017,
+coalesce(sum(case year when '2018' then payment_value end), 0.0) as Year2018
+from revenue_time
+group by month_no 
+order by month_no

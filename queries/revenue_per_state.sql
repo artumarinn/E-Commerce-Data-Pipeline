@@ -5,13 +5,13 @@
 -- should be not null. 
 
 SELECT 
-    oc.customer_state, 
-    SUM(ooi.price + ooi.freight_value) AS Revenue
+    oc.customer_state,
+    SUM(CAST(pay.payment_value AS REAL)) AS Revenue
 FROM olist_customers oc
 JOIN olist_orders oo ON oc.customer_id = oo.customer_id 
-JOIN olist_order_items ooi ON oo.order_id = ooi.order_id 
+JOIN olist_order_payments pay ON oo.order_id = pay.order_id
 WHERE 
-    oo.order_status = 'delivered' 
+    oo.order_status = 'delivered'
     AND oo.order_delivered_customer_date IS NOT NULL
 GROUP BY oc.customer_state
 ORDER BY Revenue DESC
